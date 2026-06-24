@@ -4,8 +4,8 @@ import { Stack } from "expo-router";
 
 import { ClerkProvider, useAuth } from '@clerk/expo'
 import { tokenCache } from '@clerk/expo/token-cache'
-import { ActivityIndicator, View, StyleSheet, Button, Modal } from "react-native";
-import { AuthView, UserButton } from '@clerk/expo/native'
+import { ActivityIndicator, View, StyleSheet } from "react-native";
+import { AuthView } from '@clerk/expo/native'
 import React, { useState } from "react";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
@@ -30,7 +30,7 @@ function RootStack() {
     return <AuthView onDismiss={() => setIsAuthOpen(false)} />
   }
 
-  return <Stack />
+  return <Stack screenOptions={{ headerShown: false }} />
 }
 
 export default function RootLayout() {
