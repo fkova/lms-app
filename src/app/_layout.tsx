@@ -7,7 +7,9 @@ import { tokenCache } from '@clerk/expo/token-cache'
 import { ActivityIndicator, View, StyleSheet } from "react-native";
 import { AuthView } from '@clerk/expo/native'
 import React, { useState } from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+const queryClient = new QueryClient();
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
 
 if (!publishableKey) {
@@ -35,9 +37,11 @@ function RootStack() {
 
 export default function RootLayout() {
   return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <RootStack />
-    </ClerkProvider>
+    <QueryClientProvider client={queryClient}>
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <RootStack />
+      </ClerkProvider>
+    </QueryClientProvider>
   );
 }
 

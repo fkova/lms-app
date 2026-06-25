@@ -1,52 +1,77 @@
-# Project Guidelines
+# CLAUDE.md
 
-## Critical Rule: Expo SDK 55
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Expo HAS CHANGED. Read the exact versioned docs at https://docs.expo.dev/versions/v55.0.0/ before writing any code. APIs across `expo-router`, `expo-image`, `expo-glass-effect`, `expo-symbols`, `react-native-reanimated` 4, and `react-native-worklets` have churned recently. Always check the v55 docs, not older versions.
+## Project Overview
+
+LMS (Learning Management System) — a React Native / Expo mobile app using file-based routing (Expo Router). The project targets iOS, Android, and web.
 
 ## Commands
 
-- `npm start` — Expo dev server (then press `i`/`a`/`w` for iOS/Android/web)
-- `npm run ios` / `npm run android` / `npm run web` — start directly on a platform
-- `npm run lint` — `expo lint` (no test runner is configured)
-- `npm run reset-project` — moves the current `app/` starter into `app-example/` and creates a fresh `app/` (one-time scaffolding helper from the Expo template; not for routine use)
-
-There is no test script. If asked to "run tests," confirm with the user before adding a test framework.
+- **Start dev server:** `npx expo start`
+- **iOS:** `npx expo start --ios`
+- **Android:** `npx expo start --android`
+- **Web:** `npx expo start --web`
+- **Lint:** `npx expo lint`
+- **Install deps:** `npm install`
 
 ## Architecture
 
-Expo SDK **55** + React Native **0.83** + React **19**, using **Expo Router** for file-based routing.
+- **Expo SDK 55** with React Native 0.83, React 19, TypeScript 5.9
+- **File-based routing** via `expo-router` — routes live in `src/app/`
+- **`src/app/` is screens and layouts only** — never put contexts, hooks, helpers, or other non-route files in the `app/` directory
+- **Providers/contexts** go in `src/providers/`
+- **Data hooks** go in `src/services/`
+- **Utilities and shared logic** go in `src/lib/`
+- **Path aliases:** `@/*` maps to `./src/*`, `@/assets/*` maps to `./assets/*`
+- **React Compiler** is enabled (`experiments.reactCompiler: true` in app.json)
+- **Typed routes** are enabled (`experiments.typedRoutes: true`)
+- Entry point: `expo-router/entry` (configured in package.json `main`)
+- The `example/` directory contains the original Expo template code for reference — it is not part of the running app
 
-- Routes live under `src/app/`. `src/app/_layout.tsx` is the root layout (a `Stack` from `expo-router`); `src/app/index.tsx` is the home route. New screens are added by creating files in this tree, not by registering navigators manually.
-- Path aliases (from `tsconfig.json`): `@/*` → `./src/*`, `@/assets/*` → `./assets/*`. Use these for imports rather than relative paths.
-- `app.json` enables two experiments that affect how you write code:
-  - `typedRoutes`: route strings (e.g. for `<Link href=...>`, `router.push(...)`) are type-checked against the file tree. Generated types live in `.expo/types/`.
-  - `reactCompiler`: React Compiler is on, so do **not** add manual `useMemo`/`useCallback`/`React.memo` purely for memoization — let the compiler handle it. Avoid patterns that defeat it (mutating props, conditional hooks, etc.).
-- Entry point is `expo-router/entry` (see `package.json` `main`) — there is no `App.tsx`/`index.js`.
-- App scheme for deep links: `lmsapp` (see `app.json`).
+## Styling — Tailwind CSS v4 + NativeWind v5
 
-## Styling: Tailwind CSS v4 + NativeWind v5
+- Uses `react-native-css` with `useCssElement` wrappers — **do not use raw RN components with `className`**
+- Import styled components from `@/tw` (View, Text, ScrollView, Pressable, TextInput, Link, TouchableHighlight, AnimatedScrollView) and `@/tw/image` (Image)
+- `@/tw/animated` exports `Animated.View` wrapped for CSS support
+- Global CSS lives in `src/global.css` (imported in `_layout.tsx`); theme customization uses `@theme` blocks in CSS, not a JS config file
+- Platform-specific styles use `@media ios` / `@media android` in CSS
+- `useCSSVariable` hook from `@/tw` reads CSS variables in JS (returns `var(--name)` on web, resolved value on native)
+- `tailwind-merge` and `clsx` are available for conditional/merged class names
+- Metro config (`metro.config.js`) wraps with `withNativewind`; PostCSS config uses `@tailwindcss/postcss`
 
-This project uses **Tailwind CSS v4** with **NativeWind v5** for universal styling across web and native. Styles are written as Tailwind class names and applied through the wrapper components in `src/tw/index.tsx`.
+## Authentication — Clerk
 
-**Wrapper Components** (import from `@/tw`):
-- `View`, `Text`, `Pressable`, `TextInput`, `ScrollView`, `TouchableHighlight`, `AnimatedScrollView` — React Native components wrapped with `useCssElement` to support Tailwind class names via the `className` prop.
-- `Link` — `expo-router` `Link` with Tailwind support.
-- `useCSSVariable` — Access CSS variables on native (via `react-native-css`) and web (via `var()`).
+- `@clerk/expo` handles all authentication (sign-in, sign-up, session management)
+- `ClerkProvider` wraps the app in `src/app/_layout.tsx` with `tokenCache` for secure token storage
+- Use `useAuth()` for auth state, `useUser()` for user info
+- Clerk session tokens are automatically forwarded to Supabase (see below)
 
-**Usage:**
-```tsx
-import { View, Text, Pressable } from '@/tw';
+## Backend — Supabase
 
-<View className="flex-1 bg-white px-4 py-2">
-  <Text className="text-lg font-semibold text-gray-900">Hello</Text>
-  <Pressable className="bg-blue-500 rounded-lg px-4 py-2">
-    <Text className="text-white font-medium">Press me</Text>
-  </Pressable>
-</View>
-```
+- Local Supabase dev environment (`npx supabase start` / `npx supabase stop`)
+- **Client:** `useSupabase()` hook from `@/lib/supabase` — returns a typed Supabase client that attaches the Clerk JWT automatically
+- **Types:** `src/lib/database.types.ts` — auto-generated, do not edit manually. Regenerate with `npx supabase gen types typescript --local > src/lib/database.types.ts`
+- **Migrations:** `supabase/migrations/` — create new ones with `npx supabase migration new <name>`
+- **Seed data:** `supabase/seed.sql` — applied on `npx supabase db reset`
+- **RLS:** All tables must have Row Level Security enabled. Policies use `(auth.jwt() ->> 'sub')` to match the Clerk user ID
+- Prefer `.throwOnError()` on Supabase queries/mutations so errors propagate to TanStack Query instead of being silently swallowed
 
-**How it works:**
-- `react-native-css` on native converts Tailwind classes to React Native styles.
-- On web, classes are applied directly (standard Tailwind).
-- `ScrollView` and `AnimatedScrollView` support both `className` and `contentContainerClassName` for inner scrollable content.
+## Data Fetching — TanStack Query
+
+- `QueryClientProvider` wraps the app inside `ClerkProvider` in `src/app/_layout.tsx`
+- **All remote data fetching and mutations must go through TanStack Query** (`useQuery`, `useMutation`)
+- **Service hooks pattern:** Data logic lives in `src/services/<entity>.ts`, not in screen components
+  - Each service file exports a query key factory (e.g. `coursesKeys`), query hooks (e.g. `useCourses`), and mutation hooks (e.g. `useDeleteCourse`)
+  - Screen components import and use these hooks — they should contain no direct Supabase calls
+- Mutations should invalidate relevant query keys on success
+
+## Key Dependencies
+
+- `react-native-reanimated` + `react-native-gesture-handler` for animations/gestures
+- `react-native-screens` + `react-native-safe-area-context` for navigation
+- `expo-image` for optimized image loading
+- `expo-glass-effect` for blur/glass UI effects
+- `@clerk/expo` for authentication
+- `@supabase/supabase-js` for backend/database
+- `@tanstack/react-query` for data fetching and cache management
