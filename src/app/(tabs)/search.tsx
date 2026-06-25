@@ -1,62 +1,54 @@
-import { FlatList, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useSupabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react';
+import { FlatList } from 'react-native';
+import { View, Text, Pressable } from '@/tw';
+import { useSupabase } from '@/lib/supabase';
+import type { Database } from '@/lib/database.types';
+
+type Course = Database['public']['Tables']['courses']['Row'];
 
 export default function SearchScreen() {
-  const [courses, setCourses] = useState<string[]>([])
-
-  const supabase = useSupabase()
+  const supabase = useSupabase();
+  const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    supabase.from('courses').select('title').then(({ data, error }) => {
-      if (error) {
-        console.error('Error fetching courses:', error)
-      } else {
-        const titles = data.map((c: any) => c.title)
-        setCourses(titles)
-      }
-    })
-  }, [])
+    supabase
+      .from('courses')
+      .select()
+      .then(({ data }) => {
+        if (data) setCourses(data);
+      });
+  }, [supabase]);
+
+  async function deleteCourse(id: string) {
+    try {
+      const result = await supabase.from('courses').delete().eq('id', id);
+      console.log('Delete result:', result);
+    } catch (error) {
+      console.error('Error deleting course:', error);
+    }
+    setCourses((prev) => prev.filter((c) => c.id !== id));
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Search</Text>
-      {courses.length > 0 ? (
-        <FlatList
-          data={courses}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-            <Text style={styles.courseItem}>{item}</Text>
-          )}
-          contentContainerStyle={{ gap: 8 }}
-        />
-      ) : (
-        <Text style={styles.loading}>Loading courses...</Text>
-      )}
+    <View className="flex-1">
+      <FlatList
+        data={courses}
+        keyExtractor={(item) => item.id}
+        contentInsetAdjustmentBehavior="automatic"
+        renderItem={({ item }) => (
+          <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
+            <Text className="text-base flex-1">{item.title}</Text>
+            <Pressable
+              onPress={() => {
+                console.log('Delete button pressed for course id:', item.id);
+                deleteCourse(item.id);
+              }}
+              className="pl-4 py-1">
+              <Text className="text-red-500 text-lg">✕</Text>
+            </Pressable>
+          </View>
+        )}
+      />
     </View>
-  )
+  );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
-    paddingTop: 60,
-    gap: 8,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  courseItem: {
-    fontSize: 16,
-    color: '#333',
-  },
-  loading: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 40,
-  },
-})
