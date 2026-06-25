@@ -11,6 +11,10 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.fill" md="person" />
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="search">
+        <NativeTabs.Trigger.Label>Search</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="magnifyingglass" md="magnify_docked" />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

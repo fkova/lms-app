@@ -9,7 +9,10 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "supabase-start": "./scripts/supabase-start.sh"
+    "supabase-start": "./scripts/supabase-start.sh",
+    "db:migrate": "supabase migration up",
+    "db:generate": "supabase db generate",
+    "db:pull": "supabase db pull"
   },
   "dependencies": {
     "@clerk/expo": "^3.5.3",
