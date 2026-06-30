@@ -1,102 +1,88 @@
-import { useClerk, useUser } from '@clerk/expo'
-import { UserButton, UserProfileView } from '@clerk/expo/native'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { useState } from 'react'
+import { Pressable, ScrollView, Text, View } from '@/tw';
+import { Image } from '@/tw/image';
+import { useClerk, useUser } from '@clerk/expo';
+import { UserProfileView } from '@clerk/expo/native';
+import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function Index() {
+export default function ProfileScreen() {
   const { user } = useUser()
   const { signOut } = useClerk()
+  const insets = useSafeAreaInsets();
   const [showProfile, setShowProfile] = useState(false)
 
   if (showProfile) {
     return <UserProfileView onDismiss={() => setShowProfile(false)} />
   }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Welcome</Text>
-        <View style={{ width: 44, height: 44, borderRadius: 22, overflow: 'hidden' }}>
-          <UserButton />
-        </View>
-      </View>
-      <View style={styles.profileCard}>
-        {user?.imageUrl && <Image source={{ uri: user.imageUrl }} style={styles.avatar} />}
-        <View>
-          <Text style={styles.name}>
-            {user?.firstName || 'User'} {user?.lastName || ''}
-          </Text>
-          <Text style={styles.email}>{user?.emailAddresses[0]?.emailAddress}</Text>
-        </View>
-      </View>
-      <TouchableOpacity style={styles.linkButton} onPress={() => setShowProfile(true)}>
-        <Text style={styles.linkButtonText}>Manage Profile</Text>
-      </TouchableOpacity>
+  const displayName = user ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || 'Learner' : 'Alex Rivera';
+  const avatarUrl = user?.imageUrl;
 
-      <TouchableOpacity
-        style={[styles.linkButton, { backgroundColor: '#666' }]}
-        onPress={() => signOut()}
-      >
-        <Text style={styles.linkButtonText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
-  )
+  return (
+    <ScrollView className="flex-1 bg-surface" contentContainerClassName="pb-8">
+      {/* Header */}
+      <View className="flex-row items-center gap-2 px-4 bg-surface border-b border-outline-variant/20"
+        style={{ paddingTop: insets.top + 8, paddingBottom: 12 }}>
+        <View className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} className="w-full h-full" style={{ objectFit: 'cover' }} />
+          ) : (
+            <View className="w-full h-full bg-primary-container items-center justify-center">
+              <Text className="text-white text-lg font-bold">{displayName[0]}</Text>
+            </View>
+          )}
+        </View>
+        <Text className="text-2xl font-bold text-primary">EduFlow</Text>
+      </View>
+
+      <View className="px-4 pt-4 gap-4">
+        {/* Profile Card */}
+        <View className="flex-row items-center justify-between bg-surface-container-lowest p-4 rounded-xl border border-surface-container">
+          <View className="gap-1">
+            <Text className="text-lg font-semibold text-on-surface">{displayName}</Text>
+            <View className="flex-row items-center gap-2">
+              <View className="bg-tertiary-container/60 px-2 py-0.5 rounded-full">
+                <Text className="text-xs font-bold text-on-surface uppercase">Rank: Senior Scholar</Text>
+              </View>
+              <Text className="text-xs font-semibold text-secondary">⭐ 4,850 XP</Text>
+            </View>
+          </View>
+          <Pressable
+            className="bg-primary px-4 py-2 rounded-xl"
+            onPress={() => setShowProfile(true)}
+          >
+            <Text className="text-white text-sm font-semibold">Edit Profile</Text>
+          </Pressable>
+        </View>
+
+        {/* Stats */}
+        <View className="flex-row gap-3">
+          <View className="flex-1 bg-surface-container-lowest p-4 rounded-xl border border-surface-container gap-2">
+            <Text className="text-2xl">🕐</Text>
+            <Text className="text-xs text-on-surface-variant uppercase tracking-wide">Total Hours</Text>
+            <Text className="text-3xl font-bold text-on-surface">128.5</Text>
+          </View>
+          <View className="flex-1 bg-surface-container-lowest p-4 rounded-xl border border-surface-container gap-2">
+            <Text className="text-2xl">🎓</Text>
+            <Text className="text-xs text-on-surface-variant uppercase tracking-wide">Courses Done</Text>
+            <Text className="text-3xl font-bold text-on-surface">14</Text>
+          </View>
+        </View>
+        <View className="bg-surface-container-lowest p-4 rounded-xl border border-surface-container gap-2">
+          <Text className="text-2xl">🏆</Text>
+          <Text className="text-xs text-on-surface-variant uppercase tracking-wide">Certificates</Text>
+          <Text className="text-3xl font-bold text-on-surface">08</Text>
+        </View>
+
+        {/* Sign Out */}
+        <Pressable
+          className="bg-surface-container-low border border-outline-variant rounded-xl py-3 items-center mt-2"
+          onPress={() => signOut()}
+        >
+          <Text className="text-sm font-semibold text-on-surface-variant">Sign Out</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
 }
 
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 40,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    gap: 16,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    gap: 12,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  email: {
-    fontSize: 14,
-    color: '#666',
-  },
-  linkButton: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  linkButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-})

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduFlow - Lesson Player</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .video-gradient-overlay {
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0) 40%);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .lesson-card-active {
+            border-left: 4px solid #3525cd;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-lowest": "#ffffff",
+                      "background": "#f8f9ff",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "tertiary": "#005338",
+                      "primary": "#3525cd",
+                      "on-secondary-container": "#004666",
+                      "on-primary-fixed-variant": "#3323cc",
+                      "inverse-surface": "#213145",
+                      "on-surface-variant": "#464555",
+                      "on-background": "#0b1c30",
+                      "on-tertiary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "primary-fixed-dim": "#c3c0ff",
+                      "on-secondary": "#ffffff",
+                      "surface-bright": "#f8f9ff",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-container": "#67f4b7",
+                      "surface-container": "#e5eeff",
+                      "on-surface": "#0b1c30",
+                      "secondary": "#006591",
+                      "tertiary-fixed": "#6ffbbe",
+                      "surface-tint": "#4d44e3",
+                      "on-primary": "#ffffff",
+                      "primary-container": "#4f46e5",
+                      "surface-dim": "#cbdbf5",
+                      "surface": "#f8f9ff",
+                      "inverse-on-surface": "#eaf1ff",
+                      "primary-fixed": "#e2dfff",
+                      "inverse-primary": "#c3c0ff",
+                      "on-primary-fixed": "#0f0069",
+                      "tertiary-container": "#006e4b",
+                      "on-tertiary-fixed": "#002113",
+                      "on-primary-container": "#dad7ff",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#39b8fd",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#d3e4fe",
+                      "surface-container-high": "#dce9ff",
+                      "outline-variant": "#c7c4d8",
+                      "surface-variant": "#d3e4fe",
+                      "outline": "#777587",
+                      "on-secondary-fixed-variant": "#004c6e",
+                      "secondary-fixed-dim": "#89ceff",
+                      "surface-container-low": "#eff4ff",
+                      "secondary-fixed": "#c9e6ff",
+                      "on-secondary-fixed": "#001e2f"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "base": "4px",
+                      "sm": "12px",
+                      "margin-mobile": "16px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "md": "16px",
+                      "xl": "32px",
+                      "margin-desktop": "48px"
+              },
+              "fontFamily": {
+                      "label-lg": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "display-lg": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "headline-lg-mobile": ["Inter"]
+              },
+              "fontSize": {
+                      "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "display-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen font-body-md text-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile py-xs bg-surface shadow-sm md:px-margin-desktop h-16">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform">arrow_back</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">EduFlow</h1>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity cursor-pointer">search</span>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A high-quality professional portrait of a young developer in a bright, modern studio. The background is a soft, out-of-focus tech environment with blue and indigo accents. The lighting is crisp and cinematic, emphasizing a professional yet approachable learning atmosphere. The overall style is clean and polished, fitting a high-performance educational platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3OfYQRsNEFuizh89ptfVy0f5t0cDlksE8dqE0sh18qHMe1x1lPa-TtyRlSRWnCJ_cDGByG3zt6kddeM7vCQeei-qCBLiV2AAi8QIKith2dJcPjURY7wQ7PYXcjFIij7jwcmb285SqUtUQy-fg6w5SJA05dg_GkzyxfaNBU0xIY6JDYUi8KEA1vHp8pG-SkGhPfqdVOcl1LXWMkT6sWfjl8zSh2ZCDTEVzQrc7EB5_MOuHe8t3As8ud2_VBsrqibKbOTZNt_1s5Ad_"/>
+</div>
+</div>
+</header>
+<main class="pt-20 pb-24 max-w-[1200px] mx-auto">
+<!-- Video Player Section -->
+<section class="px-margin-mobile md:px-0 mb-lg">
+<div class="relative aspect-video w-full rounded-xl overflow-hidden bg-on-background shadow-lg group">
+<img class="w-full h-full object-cover opacity-80" data-alt="A widescreen shot of a clean code editor interface showing advanced React components. The screen has a deep slate background with vibrant syntax highlighting in indigo, teal, and soft pink. Reflections of a modern home office are subtly visible on the screen. The setting is professional and focused, with soft ambient light coming from the side." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7THS93oudrJ5Ov6HYOvaLDez_pRJcKjIrY5NyKV1DNIxZY7txdsrAyLD_5bnUgn4AeJi4lSkuloiiiVMLy6S76RDHOB9K6gCGPtbkroIknm2MWCSpzhxUdy0At7M6euHvPJJAh8pGtIWv5eDZj1EO72xaZJK-unJ3IKGIRYTETOdEXhrsmBUKpCfvltCuPoFhvSxxo4H5dGBenplH9umefxyPfWKYLJkvB5WvcZbCpmbRi4hxxERX5cfPsOEKaeZOLtVIodOjN37F"/>
+<!-- Play Overlay -->
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<button class="w-20 h-20 bg-primary/90 text-white rounded-full flex items-center justify-center backdrop-blur-sm active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-5xl">play_arrow</span>
+</button>
+</div>
+<!-- Video Controls -->
+<div class="absolute bottom-0 left-0 w-full video-gradient-overlay p-md flex flex-col gap-xs backdrop-blur-[2px]">
+<!-- Progress Bar -->
+<div class="flex items-center gap-sm group/progress cursor-pointer">
+<span class="text-white font-label-sm text-label-sm">12:45</span>
+<div class="flex-1 h-1.5 bg-white/30 rounded-full relative overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-[45%] bg-primary-container rounded-full"></div>
+</div>
+<span class="text-white font-label-sm text-label-sm">24:00</span>
+</div>
+<!-- Control Buttons -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-lg">
+<button class="text-white active:scale-90 transition-all"><span class="material-symbols-outlined">play_arrow</span></button>
+<button class="text-white active:scale-90 transition-all"><span class="material-symbols-outlined">replay_10</span></button>
+<button class="text-white active:scale-90 transition-all"><span class="material-symbols-outlined">forward_10</span></button>
+<button class="text-white active:scale-90 transition-all"><span class="material-symbols-outlined">volume_up</span></button>
+</div>
+<div class="flex items-center gap-lg">
+<button class="text-white active:scale-90 transition-all"><span class="material-symbols-outlined">settings</span></button>
+<button class="text-white active:scale-90 transition-all"><span class="material-symbols-outlined">fullscreen</span></button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Lesson Info & Navigation -->
+<section class="px-margin-mobile md:px-0 flex flex-col lg:flex-row gap-lg">
+<div class="flex-1">
+<div class="mb-lg">
+<div class="flex items-center gap-xs mb-base">
+<span class="bg-secondary-container text-on-secondary-container px-xs py-base rounded-lg font-label-sm text-label-sm">Module 3</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">• Lesson 4 of 12</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Advanced State Management with Context API</h2>
+<p class="text-on-surface-variant font-body-lg text-body-lg leading-relaxed">
+                        In this comprehensive lesson, we'll dive deep into how to manage complex application states using React's built-in Context API. We will explore performance optimization patterns, when to use Context over Redux, and how to structure your providers for maximum scalability.
+                    </p>
+</div>
+<!-- Navigation Buttons -->
+<div class="flex items-center gap-md border-t border-outline-variant pt-lg">
+<button class="flex-1 md:flex-none px-xl py-md border border-primary text-primary rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-xs hover:bg-primary/5 active:scale-95 transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+                        Previous
+                    </button>
+<button class="flex-1 md:flex-none px-xl py-md bg-primary text-white rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-xs hover:bg-primary/90 active:scale-95 transition-all shadow-md">
+                        Next Lesson
+                        <span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Lessons List (Module Sidebar) -->
+<aside class="lg:w-80 w-full">
+<div class="bg-surface-container-low rounded-xl p-md shadow-sm">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-headline-md text-headline-md text-on-surface">Module Lessons</h3>
+<span class="text-primary font-label-sm text-label-sm">45% Done</span>
+</div>
+<!-- Progress Pill -->
+<div class="w-full h-1 bg-outline-variant rounded-full mb-lg overflow-hidden">
+<div class="h-full bg-tertiary-container w-[45%]"></div>
+</div>
+<div class="space-y-sm max-h-[400px] overflow-y-auto custom-scrollbar pr-xs">
+<!-- Lesson Item Completed -->
+<div class="bg-white p-sm rounded-lg flex items-start gap-sm cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="mt-1 w-6 h-6 bg-tertiary-container rounded-full flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'wght' 700;">check</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface">1. Introduction to State</h4>
+<span class="text-on-surface-variant font-label-sm text-label-sm">08:20 • Completed</span>
+</div>
+</div>
+<!-- Lesson Item Active -->
+<div class="bg-white p-sm rounded-lg flex items-start gap-sm cursor-pointer lesson-card-active shadow-sm">
+<div class="mt-1 w-6 h-6 border-2 border-primary rounded-full flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-primary">4. Context API Deep Dive</h4>
+<span class="text-on-surface-variant font-label-sm text-label-sm">24:00 • In Progress</span>
+</div>
+</div>
+<!-- Lesson Item Locked -->
+<div class="bg-surface-container-lowest/50 p-sm rounded-lg flex items-start gap-sm opacity-60">
+<div class="mt-1 w-6 h-6 bg-outline-variant rounded-full flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">lock</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface">5. Custom Hooks Patterns</h4>
+<span class="text-on-surface-variant font-label-sm text-label-sm">15:45 • Locked</span>
+</div>
+</div>
+<!-- More Items -->
+<div class="bg-surface-container-lowest/50 p-sm rounded-lg flex items-start gap-sm opacity-60">
+<div class="mt-1 w-6 h-6 bg-outline-variant rounded-full flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">lock</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface">6. Performance Tuning</h4>
+<span class="text-on-surface-variant font-label-sm text-label-sm">32:10 • Locked</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest/50 p-sm rounded-lg flex items-start gap-sm opacity-60">
+<div class="mt-1 w-6 h-6 bg-outline-variant rounded-full flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">lock</span>
+</div>
+<div>
+<h4 class="font-label-lg text-label-lg text-on-surface">7. Deployment Strategies</h4>
+<span class="text-on-surface-variant font-label-sm text-label-sm">12:00 • Locked</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</section>
+</main>
+<!-- BottomNavBar (Visible on Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-xs pb-xs pt-base bg-surface-container-lowest shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden rounded-t-xl">
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-sm text-label-sm">Discover</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1 active:scale-90 transition-all duration-200 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-label-sm text-label-sm">Courses</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-sm text-label-sm">Progress</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</div>
+</nav>
+<!-- FAB (Contextual for Notes) -->
+<button class="fixed bottom-24 right-margin-mobile w-14 h-14 bg-secondary-container text-on-secondary-container rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-transform md:bottom-12 md:right-12 group">
+<span class="material-symbols-outlined text-2xl">edit_note</span>
+<span class="absolute right-16 bg-on-background text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Take Note</span>
+</button>
+<script>
+        // Micro-interaction for play/pause
+        const videoContainer = document.querySelector('.group');
+        const playBtn = videoContainer.querySelector('button');
+        let isPlaying = false;
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            const icon = playBtn.querySelector('.material-symbols-outlined');
+            icon.textContent = isPlaying ? 'pause' : 'play_arrow';
+        });
+
+        // Simulating progress
+        const progressBar = document.querySelector('.bg-primary-container');
+        let progress = 45;
+        setInterval(() => {
+            if(isPlaying && progress < 100) {
+                progress += 0.05;
+                progressBar.style.width = `${progress}%`;
+            }
+        }, 1000);
+    </script>
+</body></html>
